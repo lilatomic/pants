@@ -111,6 +111,6 @@ def yapf_export(_: YapfExportSentinel, yapf: Yapf) -> ExportPythonTool:
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(Yapf),
+        *LockfileType.pex_simple(Yapf),
         UnionRule(ExportPythonToolSentinel, YapfExportSentinel),
     )

@@ -57,6 +57,6 @@ def rules():
     return (
         *collect_rules(),
         UnionRule(ExportPythonToolSentinel, AutoflakeExportSentinel),
-        *LockfileType.PEX_SIMPLE.default_rules(Autoflake),
+        *LockfileType.pex_simple(Autoflake),
         *Autoflake.rules(),
     )

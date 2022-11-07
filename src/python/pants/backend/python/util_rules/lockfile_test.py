@@ -46,7 +46,7 @@ class MockTarget(Target):
 
 
 def mk_rule_runner() -> RuleRunner:
-    generated_rules = tuple(LockfileType.PEX_SIMPLE.default_rules(FakeTool))
+    generated_rules = tuple(LockfileType.pex_simple(FakeTool))
 
     rule_runner = RuleRunner(
         rules=[

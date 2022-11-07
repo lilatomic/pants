@@ -154,5 +154,5 @@ def rules():
     return [
         *collect_rules(),
         *pex.rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(HelmKubeParserSubsystem),
+        *LockfileType.pex_simple(HelmKubeParserSubsystem),
     ]

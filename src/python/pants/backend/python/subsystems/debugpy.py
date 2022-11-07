@@ -47,5 +47,5 @@ class DebugPy(PythonToolBase):
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(DebugPy),
+        *LockfileType.pex_simple(DebugPy),
     )

@@ -148,5 +148,5 @@ def rules():
     return [
         *collect_rules(),
         UnionRule(InferDependenciesRequest, InferTerraformModuleDependenciesRequest),
-        *LockfileType.PEX_SIMPLE.default_rules(TerraformHcl2Parser),
+        *LockfileType.pex_simple(TerraformHcl2Parser),
     ]

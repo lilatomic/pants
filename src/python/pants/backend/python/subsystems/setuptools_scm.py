@@ -29,5 +29,5 @@ class SetuptoolsSCM(PythonToolBase):
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(SetuptoolsSCM),
+        *LockfileType.pex_simple(SetuptoolsSCM),
     )

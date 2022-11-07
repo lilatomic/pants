@@ -59,6 +59,6 @@ def add_trailing_comma_export(
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(AddTrailingComma),
+        *LockfileType.pex_simple(AddTrailingComma),
         UnionRule(ExportPythonToolSentinel, AddTrailingCommaExportSentinel),
     )

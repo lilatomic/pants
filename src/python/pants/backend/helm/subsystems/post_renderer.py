@@ -302,5 +302,5 @@ def rules():
     return [
         *collect_rules(),
         *pex.rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(HelmPostRendererSubsystem),
+        *LockfileType.pex_simple(HelmPostRendererSubsystem),
     ]

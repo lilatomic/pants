@@ -39,5 +39,5 @@ class PyOxidizer(PythonToolBase):
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(PyOxidizer),
+        *LockfileType.pex_simple(PyOxidizer),
     )

@@ -144,5 +144,5 @@ def rules():
     return [
         *collect_rules(),
         UnionRule(InferDependenciesRequest, InferPythonProtobufDependencies),
-        *LockfileType.PEX_SIMPLE.default_rules(PythonProtobufMypyPlugin),
+        *LockfileType.pex_simple(PythonProtobufMypyPlugin),
     ]

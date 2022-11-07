@@ -113,6 +113,6 @@ def isort_export(_: IsortExportSentinel, isort: Isort) -> ExportPythonTool:
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(Isort),
+        *LockfileType.pex_simple(Isort),
         UnionRule(ExportPythonToolSentinel, IsortExportSentinel),
     )

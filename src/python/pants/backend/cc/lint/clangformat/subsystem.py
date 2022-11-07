@@ -75,6 +75,6 @@ def clangformat_export(_: ClangFormatExportSentinel, clangformat: ClangFormat) -
 def rules() -> Iterable[Rule | UnionRule]:
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(ClangFormat),
+        *LockfileType.pex_simple(ClangFormat),
         UnionRule(ExportPythonToolSentinel, ClangFormatExportSentinel),
     )

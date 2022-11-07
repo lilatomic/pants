@@ -27,5 +27,5 @@ class Lambdex(PythonToolBase):
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(Lambdex),
+        *LockfileType.pex_simple(Lambdex),
     )

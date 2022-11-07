@@ -188,5 +188,5 @@ def rules():
     return (
         *collect_rules(),
         *pex.rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(DockerfileParser),
+        *LockfileType.pex_simple(DockerfileParser),
     )

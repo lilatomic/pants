@@ -51,6 +51,6 @@ def docformatter_export(
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(Docformatter),
+        *LockfileType.pex_simple(Docformatter),
         UnionRule(ExportPythonToolSentinel, DocformatterExportSentinel),
     )

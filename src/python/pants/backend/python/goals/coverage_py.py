@@ -605,5 +605,5 @@ def rules():
     return [
         *collect_rules(),
         UnionRule(CoverageDataCollection, PytestCoverageDataCollection),
-        *LockfileType.PEX_SIMPLE.default_rules(CoverageSubsystem),
+        *LockfileType.pex_simple(CoverageSubsystem),
     ]

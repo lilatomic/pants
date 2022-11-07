@@ -105,5 +105,5 @@ class TwineSubsystem(PythonToolBase):
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(TwineSubsystem),
+        *LockfileType.pex_simple(TwineSubsystem),
     )

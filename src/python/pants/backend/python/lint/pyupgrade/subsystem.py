@@ -52,6 +52,6 @@ def pyupgrade_export(_: PyUpgradeExportSentinel, pyupgrade: PyUpgrade) -> Export
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.PEX_SIMPLE.default_rules(PyUpgrade),
+        *LockfileType.pex_simple(PyUpgrade),
         UnionRule(ExportPythonToolSentinel, PyUpgradeExportSentinel),
     )
