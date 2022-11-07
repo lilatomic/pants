@@ -2,13 +2,10 @@
 # Licensed under the Apache License, Version 2.0 (see LICENSE).
 
 from pants.backend.python.goals import lockfile
-from pants.backend.python.goals.lockfile import GeneratePythonLockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
-from pants.backend.python.util_rules.pex_requirements import GeneratePythonToolLockfileSentinel
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
-from pants.engine.rules import collect_rules, rule
-from pants.engine.unions import UnionRule
+from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.engine.rules import collect_rules
 from pants.option.option_types import ArgsListOption
 from pants.util.docutil import git_url
 from pants.util.strutil import softwrap
@@ -40,20 +37,9 @@ class PyOxidizer(PythonToolBase):
     args = ArgsListOption(example="--release")
 
 
-class PyoxidizerLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = PyOxidizer.options_scope
-
-
-@rule
-def setup_lockfile_request(
-    _: PyoxidizerLockfileSentinel, pyoxidizer: PyOxidizer
-) -> GeneratePythonLockfile:
-    return GeneratePythonLockfile.from_tool(pyoxidizer)
-
-
 def rules():
     return (
         *collect_rules(),
         *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, PyoxidizerLockfileSentinel),
+        *LockfileType.PEX_SIMPLE.default_rules(PyOxidizer),
     )

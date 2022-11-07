@@ -16,13 +16,11 @@ import yaml
 
 from pants.backend.helm.utils.yaml import FrozenYamlIndex
 from pants.backend.python.goals import lockfile
-from pants.backend.python.goals.lockfile import GeneratePythonLockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
 from pants.backend.python.util_rules import pex
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.backend.python.util_rules.pex import PexRequest, VenvPex, VenvPexProcess
-from pants.backend.python.util_rules.pex_requirements import GeneratePythonToolLockfileSentinel
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
 from pants.core.goals.run import RunFieldSet, RunRequest
 from pants.core.util_rules.system_binaries import CatBinary
 from pants.engine.addresses import UnparsedAddressInputs
@@ -32,7 +30,6 @@ from pants.engine.internals.native_engine import MergeDigests
 from pants.engine.process import Process
 from pants.engine.rules import Get, MultiGet, collect_rules, rule, rule_helper
 from pants.engine.target import FieldSetsPerTarget, FieldSetsPerTargetRequest, Targets
-from pants.engine.unions import UnionRule
 from pants.util.docutil import git_url
 from pants.util.frozendict import FrozenDict
 from pants.util.logging import LogLevel
@@ -63,17 +60,6 @@ class HelmPostRendererSubsystem(PythonToolRequirementsBase):
         f"src/python/{_HELM_POSTRENDERER_PACKAGE.replace('.', '/')}/post_renderer.lock"
     )
     default_lockfile_url = git_url(default_lockfile_path)
-
-
-class HelmPostRendererLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = HelmPostRendererSubsystem.options_scope
-
-
-@rule
-def setup_postrenderer_lockfile_request(
-    _: HelmPostRendererLockfileSentinel, post_renderer: HelmPostRendererSubsystem
-) -> GeneratePythonLockfile:
-    return GeneratePythonLockfile.from_tool(post_renderer)
 
 
 _HELM_POST_RENDERER_TOOL = "__pants_helm_post_renderer.py"
@@ -318,5 +304,5 @@ def rules():
         *collect_rules(),
         *pex.rules(),
         *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, HelmPostRendererLockfileSentinel),
+        *LockfileType.PEX_SIMPLE.default_rules(HelmPostRendererSubsystem),
     ]

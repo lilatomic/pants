@@ -4,17 +4,12 @@
 from __future__ import annotations
 
 from pants.backend.python.goals import lockfile
-from pants.backend.python.goals.lockfile import (
-    GeneratePythonLockfile,
-    GeneratePythonToolLockfileSentinel,
-)
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.core.util_rules.config_files import ConfigFilesRequest
 from pants.engine.fs import CreateDigest
-from pants.engine.rules import collect_rules, rule
-from pants.engine.unions import UnionRule
+from pants.engine.rules import collect_rules
 from pants.option.global_options import ca_certs_path_to_file_content
 from pants.option.option_types import ArgsListOption, BoolOption, FileOption, SkipOption, StrOption
 from pants.util.docutil import doc_url, git_url
@@ -108,18 +103,9 @@ class TwineSubsystem(PythonToolBase):
         return CreateDigest((ca_certs_path_to_file_content(path),))
 
 
-class TwineLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = TwineSubsystem.options_scope
-
-
-@rule
-def setup_twine_lockfile(_: TwineLockfileSentinel, twine: TwineSubsystem) -> GeneratePythonLockfile:
-    return GeneratePythonLockfile.from_tool(twine)
-
-
 def rules():
     return (
         *collect_rules(),
         *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, TwineLockfileSentinel),
+        *LockfileType.PEX_SIMPLE.default_rules(TwineSubsystem),
     )

@@ -5,13 +5,9 @@ from __future__ import annotations
 
 from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
-from pants.backend.python.goals.lockfile import (
-    GeneratePythonLockfile,
-    GeneratePythonToolLockfileSentinel,
-)
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.engine.rules import collect_rules, rule
 from pants.engine.unions import UnionRule
 from pants.option.option_types import ArgsListOption, SkipOption
@@ -44,17 +40,6 @@ class AddTrailingComma(PythonToolBase):
     export = ExportToolOption()
 
 
-class AddTrailingCommaLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = AddTrailingComma.options_scope
-
-
-@rule()
-async def setup_add_trailing_comma_lockfile(
-    _: AddTrailingCommaLockfileSentinel, add_trailing_comma: AddTrailingComma
-) -> GeneratePythonLockfile:
-    return GeneratePythonLockfile.from_tool(add_trailing_comma)
-
-
 class AddTrailingCommaExportSentinel(ExportPythonToolSentinel):
     pass
 
@@ -76,6 +61,6 @@ def rules():
     return (
         *collect_rules(),
         *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, AddTrailingCommaLockfileSentinel),
+        *LockfileType.PEX_SIMPLE.default_rules(AddTrailingComma),
         UnionRule(ExportPythonToolSentinel, AddTrailingCommaExportSentinel),
     )

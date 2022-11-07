@@ -11,18 +11,15 @@ from typing import Any
 
 from pants.backend.helm.utils.yaml import YamlPath
 from pants.backend.python.goals import lockfile
-from pants.backend.python.goals.lockfile import GeneratePythonLockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
 from pants.backend.python.util_rules import pex
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.backend.python.util_rules.pex import PexRequest, VenvPex, VenvPexProcess
-from pants.backend.python.util_rules.pex_requirements import GeneratePythonToolLockfileSentinel
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
 from pants.engine.engine_aware import EngineAwareParameter, EngineAwareReturnType
 from pants.engine.fs import CreateDigest, Digest, FileContent, FileEntry
 from pants.engine.process import FallibleProcessResult
 from pants.engine.rules import Get, collect_rules, rule
-from pants.engine.unions import UnionRule
 from pants.util.docutil import git_url
 from pants.util.logging import LogLevel
 from pants.util.strutil import pluralize, softwrap
@@ -48,17 +45,6 @@ class HelmKubeParserSubsystem(PythonToolRequirementsBase):
         f"src/python/{_HELM_K8S_PARSER_PACKAGE.replace('.', '/')}/k8s_parser.lock"
     )
     default_lockfile_url = git_url(default_lockfile_path)
-
-
-class HelmKubeParserLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = HelmKubeParserSubsystem.options_scope
-
-
-@rule
-def setup_k8s_parser_lockfile_request(
-    _: HelmKubeParserLockfileSentinel, post_renderer: HelmKubeParserSubsystem
-) -> GeneratePythonLockfile:
-    return GeneratePythonLockfile.from_tool(post_renderer)
 
 
 @dataclass(frozen=True)
@@ -170,5 +156,5 @@ def rules():
         *collect_rules(),
         *pex.rules(),
         *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, HelmKubeParserLockfileSentinel),
+        *LockfileType.PEX_SIMPLE.default_rules(HelmKubeParserSubsystem),
     ]
