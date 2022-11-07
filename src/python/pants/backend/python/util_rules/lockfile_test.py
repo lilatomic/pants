@@ -6,7 +6,6 @@ from __future__ import annotations
 from textwrap import dedent
 
 from pants.backend.python.dependency_inference.rules import import_rules
-from pants.backend.python.goals import lockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
 from pants.backend.python.util_rules.lockfile import LockfileType
@@ -52,7 +51,6 @@ def mk_rule_runner() -> RuleRunner:
     rule_runner = RuleRunner(
         rules=[
             *generate_lockfiles.rules(),
-            *lockfile.rules(),
             *import_rules(),
             *generated_rules,
             *FakeTool.rules(),  # type: ignore[call-arg] # seems to only be a problem in this file

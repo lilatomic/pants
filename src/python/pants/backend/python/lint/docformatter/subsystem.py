@@ -2,7 +2,6 @@
 # Licensed under the Apache License, Version 2.0 (see LICENSE).
 
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
@@ -52,7 +51,6 @@ def docformatter_export(
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
         *LockfileType.PEX_SIMPLE.default_rules(Docformatter),
         UnionRule(ExportPythonToolSentinel, DocformatterExportSentinel),
     )

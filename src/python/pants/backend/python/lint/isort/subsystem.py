@@ -6,7 +6,6 @@ from __future__ import annotations
 import os.path
 from typing import Iterable
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
@@ -114,7 +113,6 @@ def isort_export(_: IsortExportSentinel, isort: Isort) -> ExportPythonTool:
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
         *LockfileType.PEX_SIMPLE.default_rules(Isort),
         UnionRule(ExportPythonToolSentinel, IsortExportSentinel),
     )

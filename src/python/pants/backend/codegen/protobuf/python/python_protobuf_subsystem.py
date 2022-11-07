@@ -10,7 +10,6 @@ from pants.backend.codegen.protobuf.target_types import (
 )
 from pants.backend.codegen.utils import find_python_runtime_library_or_raise_error
 from pants.backend.python.dependency_inference.module_mapper import ThirdPartyPythonModuleMapping
-from pants.backend.python.goals import lockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.subsystems.setup import PythonSetup
 from pants.backend.python.util_rules.lockfile import LockfileType
@@ -144,7 +143,6 @@ async def infer_dependencies(
 def rules():
     return [
         *collect_rules(),
-        *lockfile.rules(),
         UnionRule(InferDependenciesRequest, InferPythonProtobufDependencies),
         *LockfileType.PEX_SIMPLE.default_rules(PythonProtobufMypyPlugin),
     ]

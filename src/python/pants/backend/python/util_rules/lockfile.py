@@ -12,6 +12,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterable, Type
 
+from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.lockfile import GeneratePythonLockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
@@ -39,6 +40,7 @@ class LockfileType(Enum):
         elif self == LockfileType.PEX_SIMPLE:
             rules_generator = _pex_simple_lockfile_rules(cls)
             yield from rules_generator
+            yield from lockfile.rules()
 
 
 @memoized

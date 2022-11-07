@@ -9,7 +9,6 @@ from pathlib import PurePath
 
 from pants.backend.docker.target_types import DockerImageSourceField
 from pants.backend.docker.util_rules.docker_build_args import DockerBuildArgs
-from pants.backend.python.goals import lockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
 from pants.backend.python.util_rules import pex
@@ -188,7 +187,6 @@ async def parse_dockerfile(request: DockerfileInfoRequest) -> DockerfileInfo:
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
         *pex.rules(),
         *LockfileType.PEX_SIMPLE.default_rules(DockerfileParser),
     )

@@ -15,7 +15,6 @@ from typing import Any, Iterable, Mapping
 import yaml
 
 from pants.backend.helm.utils.yaml import FrozenYamlIndex
-from pants.backend.python.goals import lockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
 from pants.backend.python.util_rules import pex
@@ -303,6 +302,5 @@ def rules():
     return [
         *collect_rules(),
         *pex.rules(),
-        *lockfile.rules(),
         *LockfileType.PEX_SIMPLE.default_rules(HelmPostRendererSubsystem),
     ]

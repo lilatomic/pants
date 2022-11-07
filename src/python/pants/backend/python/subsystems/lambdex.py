@@ -1,7 +1,6 @@
 # Copyright 2019 Pants project contributors (see CONTRIBUTORS.md).
 # Licensed under the Apache License, Version 2.0 (see LICENSE).
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
 from pants.backend.python.util_rules.lockfile import LockfileType
@@ -26,4 +25,7 @@ class Lambdex(PythonToolBase):
 
 
 def rules():
-    return (*collect_rules(), *lockfile.rules(), *LockfileType.PEX_SIMPLE.default_rules(Lambdex))
+    return (
+        *collect_rules(),
+        *LockfileType.PEX_SIMPLE.default_rules(Lambdex),
+    )

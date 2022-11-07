@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import PurePath
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
 from pants.backend.python.util_rules.lockfile import LockfileType
@@ -148,7 +147,6 @@ async def infer_terraform_module_dependencies(
 def rules():
     return [
         *collect_rules(),
-        *lockfile.rules(),
         UnionRule(InferDependenciesRequest, InferTerraformModuleDependenciesRequest),
         *LockfileType.PEX_SIMPLE.default_rules(TerraformHcl2Parser),
     ]
