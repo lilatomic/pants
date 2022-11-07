@@ -7,7 +7,6 @@ from pants.backend.python.subsystems.python_tool_base import PythonToolRequireme
 from pants.backend.python.target_types import PythonProvidesField
 from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.core.goals.package import PackageFieldSet
-from pants.engine.rules import collect_rules
 from pants.util.docutil import git_url
 
 
@@ -33,6 +32,6 @@ class Setuptools(PythonToolRequirementsBase):
 
 def rules():
     return (
-        *collect_rules(),
+        *Setuptools.rules(),
         *LockfileType.python_with_constraints(Setuptools, PythonDistributionFieldSet),
     )
