@@ -3,22 +3,12 @@
 
 from dataclasses import dataclass
 
-from pants.backend.python.goals import lockfile
-from pants.backend.python.goals.lockfile import (
-    GeneratePythonLockfile,
-    GeneratePythonToolLockfileSentinel,
-)
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
-from pants.backend.python.subsystems.setup import PythonSetup
 from pants.backend.python.target_types import PythonProvidesField
-from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.core.goals.package import PackageFieldSet
-from pants.engine.rules import collect_rules, rule
-from pants.engine.unions import UnionRule
+from pants.engine.rules import collect_rules
 from pants.util.docutil import git_url
-from pants.util.logging import LogLevel
-from pants.util.strutil import softwrap
 
 
 @dataclass(frozen=True)
@@ -41,34 +31,8 @@ class Setuptools(PythonToolRequirementsBase):
     default_lockfile_url = git_url(default_lockfile_path)
 
 
-class SetuptoolsLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = Setuptools.options_scope
-
-
-@rule(
-    desc=softwrap(
-        """
-        Determine all Python interpreter versions used by setuptools in your project
-        (for lockfile generation)
-        """
-    ),
-    level=LogLevel.DEBUG,
-)
-async def setup_setuptools_lockfile(
-    _: SetuptoolsLockfileSentinel, setuptools: Setuptools, python_setup: PythonSetup
-) -> GeneratePythonLockfile:
-    if not setuptools.uses_custom_lockfile:
-        return GeneratePythonLockfile.from_tool(setuptools)
-
-    interpreter_constraints = await _find_all_unique_interpreter_constraints(
-        python_setup, PythonDistributionFieldSet
-    )
-    return GeneratePythonLockfile.from_tool(setuptools, interpreter_constraints)
-
-
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, SetuptoolsLockfileSentinel),
+        *LockfileType.python_with_constraints(Setuptools, PythonDistributionFieldSet),
     )

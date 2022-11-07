@@ -9,12 +9,7 @@ from typing import Iterable
 
 from packaging.utils import canonicalize_name as canonicalize_project_name
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
-from pants.backend.python.goals.lockfile import (
-    GeneratePythonLockfile,
-    GeneratePythonToolLockfileSentinel,
-)
 from pants.backend.python.pip_requirement import PipRequirement
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.subsystems.setup import PythonSetup
@@ -29,8 +24,8 @@ from pants.backend.python.target_types import (
     PythonTestsXdistConcurrencyField,
     SkipPythonTestsField,
 )
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
 from pants.core.goals.test import RuntimePackageDependenciesField, TestFieldSet
 from pants.core.util_rules.config_files import ConfigFilesRequest
 from pants.core.util_rules.environments import EnvironmentField
@@ -201,29 +196,6 @@ class PyTest(PythonToolBase):
         )
 
 
-class PytestLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = PyTest.options_scope
-
-
-@rule(
-    desc=softwrap(
-        """
-        Determine all Python interpreter versions used by Pytest in your project
-        (for lockfile generation)
-        """
-    ),
-    level=LogLevel.DEBUG,
-)
-async def setup_pytest_lockfile(
-    _: PytestLockfileSentinel, pytest: PyTest, python_setup: PythonSetup
-) -> GeneratePythonLockfile:
-    if not pytest.uses_custom_lockfile:
-        return GeneratePythonLockfile.from_tool(pytest)
-
-    constraints = await _find_all_unique_interpreter_constraints(python_setup, PythonTestFieldSet)
-    return GeneratePythonLockfile.from_tool(pytest, constraints)
-
-
 class PytestExportSentinel(ExportPythonToolSentinel):
     pass
 
@@ -252,7 +224,6 @@ async def pytest_export(
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, PytestLockfileSentinel),
+        *LockfileType.python_with_constraints(PyTest, PythonTestFieldSet),
         UnionRule(ExportPythonToolSentinel, PytestExportSentinel),
     )
