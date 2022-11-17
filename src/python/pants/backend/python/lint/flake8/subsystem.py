@@ -5,12 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
-from pants.backend.python.goals.lockfile import (
-    GeneratePythonLockfile,
-    GeneratePythonToolLockfileSentinel,
-)
 from pants.backend.python.lint.flake8.skip_field import SkipFlake8Field
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.subsystems.setup import PythonSetup
@@ -21,13 +16,13 @@ from pants.backend.python.target_types import (
     PythonSourceField,
 )
 from pants.backend.python.util_rules import python_sources
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
 from pants.backend.python.util_rules.pex_requirements import PexRequirements
 from pants.backend.python.util_rules.python_sources import (
     PythonSourceFilesRequest,
     StrippedPythonSourceFiles,
 )
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
 from pants.core.util_rules.config_files import ConfigFilesRequest
 from pants.engine.addresses import Addresses, UnparsedAddressInputs
 from pants.engine.fs import AddPrefix, Digest
@@ -234,38 +229,38 @@ async def flake8_first_party_plugins(flake8: Flake8) -> Flake8FirstPartyPlugins:
 # --------------------------------------------------------------------------------------
 
 
-class Flake8LockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = Flake8.options_scope
-
-
-@rule(
-    desc=softwrap(
-        """
-        Determine all Python interpreter versions used by Flake8 in your project
-        (for lockfile generation)
-        """
-    ),
-    level=LogLevel.DEBUG,
-)
-async def setup_flake8_lockfile(
-    _: Flake8LockfileSentinel,
-    first_party_plugins: Flake8FirstPartyPlugins,
-    flake8: Flake8,
-    python_setup: PythonSetup,
-) -> GeneratePythonLockfile:
-    if not flake8.uses_custom_lockfile:
-        return GeneratePythonLockfile.from_tool(flake8)
-
-    constraints = await _find_all_unique_interpreter_constraints(
-        python_setup,
-        Flake8FieldSet,
-        extra_constraints_per_tgt=first_party_plugins.interpreter_constraints_fields,
-    )
-    return GeneratePythonLockfile.from_tool(
-        flake8,
-        constraints,
-        extra_requirements=first_party_plugins.requirement_strings,
-    )
+# class Flake8LockfileSentinel(GeneratePythonToolLockfileSentinel):
+#     resolve_name = Flake8.options_scope
+#
+#
+# @rule(
+#     desc=softwrap(
+#         """
+#         Determine all Python interpreter versions used by Flake8 in your project
+#         (for lockfile generation)
+#         """
+#     ),
+#     level=LogLevel.DEBUG,
+# )
+# async def setup_flake8_lockfile(
+#     _: Flake8LockfileSentinel,
+#     first_party_plugins: Flake8FirstPartyPlugins,
+#     flake8: Flake8,
+#     python_setup: PythonSetup,
+# ) -> GeneratePythonLockfile:
+#     if not flake8.uses_custom_lockfile:
+#         return GeneratePythonLockfile.from_tool(flake8)
+#
+#     constraints = await _find_all_unique_interpreter_constraints(
+#         python_setup,
+#         Flake8FieldSet,
+#         extra_constraints_per_tgt=first_party_plugins.interpreter_constraints_fields,
+#     )
+#     return GeneratePythonLockfile.from_tool(
+#         flake8,
+#         constraints,
+#         extra_requirements=first_party_plugins.requirement_strings,
+#     )
 
 
 # --------------------------------------------------------------------------------------
@@ -311,8 +306,9 @@ async def flake8_export(
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
+        *LockfileType.python_with_first_party(Flake8, Flake8FieldSet, Flake8FirstPartyPlugins),
+        # *lockfile.rules(),
         *python_sources.rules(),
-        UnionRule(GenerateToolLockfileSentinel, Flake8LockfileSentinel),
+        # UnionRule(GenerateToolLockfileSentinel, Flake8LockfileSentinel),
         UnionRule(ExportPythonToolSentinel, Flake8ExportSentinel),
     )
