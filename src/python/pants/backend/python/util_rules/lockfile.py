@@ -9,7 +9,9 @@ TODO:
 
 from __future__ import annotations
 
-from typing import Iterable, Protocol, Type
+from typing import Iterable, Type
+
+from typing_extensions import Protocol
 
 from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.lockfile import GeneratePythonLockfile
