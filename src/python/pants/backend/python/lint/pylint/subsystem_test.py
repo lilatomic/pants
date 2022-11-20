@@ -10,11 +10,7 @@ import pytest
 from pants.backend.python import target_types_rules
 from pants.backend.python.goals.lockfile import GeneratePythonLockfile
 from pants.backend.python.lint.pylint import skip_field
-from pants.backend.python.lint.pylint.subsystem import (
-    Pylint,
-    PylintFirstPartyPlugins,
-    PylintLockfileSentinel,
-)
+from pants.backend.python.lint.pylint.subsystem import Pylint, PylintFirstPartyPlugins
 from pants.backend.python.lint.pylint.subsystem import rules as subsystem_rules
 from pants.backend.python.target_types import (
     InterpreterConstraintsField,
@@ -23,6 +19,7 @@ from pants.backend.python.target_types import (
 )
 from pants.backend.python.util_rules import python_sources
 from pants.backend.python.util_rules.interpreter_constraints import InterpreterConstraints
+from pants.backend.python.util_rules.lockfile_test import _get_generated_lockfile_sentinel
 from pants.core.target_types import GenericTarget
 from pants.engine.addresses import Address
 from pants.testutil.python_interpreter_selection import skip_unless_all_pythons_present
@@ -32,6 +29,8 @@ from pants.util.ordered_set import FrozenOrderedSet
 
 @pytest.fixture
 def rule_runner() -> RuleRunner:
+    lockfile_cls = _get_generated_lockfile_sentinel(subsystem_rules(), Pylint)
+
     return RuleRunner(
         rules=[
             *subsystem_rules(),
@@ -39,7 +38,7 @@ def rule_runner() -> RuleRunner:
             *python_sources.rules(),
             *target_types_rules.rules(),
             QueryRule(PylintFirstPartyPlugins, []),
-            QueryRule(GeneratePythonLockfile, [PylintLockfileSentinel]),
+            QueryRule(GeneratePythonLockfile, [lockfile_cls]),
         ],
         target_types=[PythonSourcesGeneratorTarget, GenericTarget, PythonRequirementTarget],
     )
@@ -121,7 +120,9 @@ def test_setup_lockfile(rule_runner: RuleRunner) -> None:
             env={"PANTS_PYTHON_INTERPRETER_CONSTRAINTS": f"['{global_constraint}']"},
             env_inherit={"PATH", "PYENV_ROOT", "HOME"},
         )
-        lockfile_request = rule_runner.request(GeneratePythonLockfile, [PylintLockfileSentinel()])
+
+        lockfile_cls = _get_generated_lockfile_sentinel(subsystem_rules(), Pylint)
+        lockfile_request = rule_runner.request(GeneratePythonLockfile, [lockfile_cls()])
         assert lockfile_request.interpreter_constraints == InterpreterConstraints(expected_ics)
         assert lockfile_request.requirements == FrozenOrderedSet(
             [

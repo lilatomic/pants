@@ -7,12 +7,7 @@ import os.path
 from dataclasses import dataclass
 from typing import Iterable
 
-from pants.backend.python.goals import lockfile
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
-from pants.backend.python.goals.lockfile import (
-    GeneratePythonLockfile,
-    GeneratePythonToolLockfileSentinel,
-)
 from pants.backend.python.lint.pylint.skip_field import SkipPylintField
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.subsystems.setup import PythonSetup
@@ -23,13 +18,13 @@ from pants.backend.python.target_types import (
     PythonResolveField,
     PythonSourceField,
 )
+from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
 from pants.backend.python.util_rules.pex_requirements import PexRequirements
 from pants.backend.python.util_rules.python_sources import (
     PythonSourceFilesRequest,
     StrippedPythonSourceFiles,
 )
-from pants.core.goals.generate_lockfiles import GenerateToolLockfileSentinel
 from pants.core.util_rules.config_files import ConfigFilesRequest
 from pants.engine.addresses import Addresses, UnparsedAddressInputs
 from pants.engine.fs import EMPTY_DIGEST, AddPrefix, Digest
@@ -219,43 +214,43 @@ async def pylint_first_party_plugins(pylint: Pylint) -> PylintFirstPartyPlugins:
     )
 
 
-# --------------------------------------------------------------------------------------
-# Lockfile
-# --------------------------------------------------------------------------------------
-
-
-class PylintLockfileSentinel(GeneratePythonToolLockfileSentinel):
-    resolve_name = Pylint.options_scope
-
-
-@rule(
-    desc=softwrap(
-        """
-        Determine all Python interpreter versions used by Pylint in your project
-        (for lockfile generation)
-        """
-    ),
-    level=LogLevel.DEBUG,
-)
-async def setup_pylint_lockfile(
-    _: PylintLockfileSentinel,
-    first_party_plugins: PylintFirstPartyPlugins,
-    pylint: Pylint,
-    python_setup: PythonSetup,
-) -> GeneratePythonLockfile:
-    if not pylint.uses_custom_lockfile:
-        return GeneratePythonLockfile.from_tool(pylint)
-
-    constraints = await _find_all_unique_interpreter_constraints(
-        python_setup,
-        PylintFieldSet,
-        extra_constraints_per_tgt=first_party_plugins.interpreter_constraints_fields,
-    )
-    return GeneratePythonLockfile.from_tool(
-        pylint,
-        constraints,
-        extra_requirements=first_party_plugins.requirement_strings,
-    )
+# # --------------------------------------------------------------------------------------
+# # Lockfile
+# # --------------------------------------------------------------------------------------
+#
+#
+# class PylintLockfileSentinel(GeneratePythonToolLockfileSentinel):
+#     resolve_name = Pylint.options_scope
+#
+#
+# @rule(
+#     desc=softwrap(
+#         """
+#         Determine all Python interpreter versions used by Pylint in your project
+#         (for lockfile generation)
+#         """
+#     ),
+#     level=LogLevel.DEBUG,
+# )
+# async def setup_pylint_lockfile(
+#     _: PylintLockfileSentinel,
+#     first_party_plugins: PylintFirstPartyPlugins,
+#     pylint: Pylint,
+#     python_setup: PythonSetup,
+# ) -> GeneratePythonLockfile:
+#     if not pylint.uses_custom_lockfile:
+#         return GeneratePythonLockfile.from_tool(pylint)
+#
+#     constraints = await _find_all_unique_interpreter_constraints(
+#         python_setup,
+#         PylintFieldSet,
+#         extra_constraints_per_tgt=first_party_plugins.interpreter_constraints_fields,
+#     )
+#     return GeneratePythonLockfile.from_tool(
+#         pylint,
+#         constraints,
+#         extra_requirements=first_party_plugins.requirement_strings,
+#     )
 
 
 # --------------------------------------------------------------------------------------
@@ -301,7 +296,6 @@ async def pylint_export(
 def rules():
     return (
         *collect_rules(),
-        *lockfile.rules(),
-        UnionRule(GenerateToolLockfileSentinel, PylintLockfileSentinel),
+        *LockfileType.python_with_first_party(Pylint, PylintFieldSet, PylintFirstPartyPlugins),
         UnionRule(ExportPythonToolSentinel, PylintExportSentinel),
     )
