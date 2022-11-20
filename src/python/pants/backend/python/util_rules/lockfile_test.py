@@ -4,15 +4,32 @@
 from __future__ import annotations
 
 from textwrap import dedent
+from typing import Iterable, Type
 
 from pants.backend.python.dependency_inference.rules import import_rules
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
 from pants.backend.python.util_rules.lockfile import LockfileType
 from pants.core.goals import generate_lockfiles
-from pants.core.goals.generate_lockfiles import GenerateLockfilesGoal
+from pants.core.goals.generate_lockfiles import GenerateLockfilesGoal, GenerateToolLockfileSentinel
 from pants.engine.target import Dependencies, SingleSourceField, Target
+from pants.engine.unions import UnionRule
 from pants.testutil.rule_runner import RuleRunner
+
+
+def _get_generated_lockfile_sentinel(
+    rules: Iterable, subsystem: Type[PythonToolBase]
+) -> Type[GenerateToolLockfileSentinel]:
+    """Fish the generated lockfile sentinel out of the pool of rules so it can be used in a
+    QueryRule."""
+    return next(
+        r
+        for r in rules
+        if isinstance(r, UnionRule)
+        and r.union_base == GenerateToolLockfileSentinel
+        and isinstance(r.union_member, GenerateToolLockfileSentinel)  # TypeGuard keeps mypy happy
+        and r.union_member.resolve_name == subsystem.options_scope
+    ).union_member
 
 
 class FakeTool(PythonToolBase):
