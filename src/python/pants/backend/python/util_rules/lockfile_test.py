@@ -27,7 +27,7 @@ def _get_generated_lockfile_sentinel(
         for r in rules
         if isinstance(r, UnionRule)
         and r.union_base == GenerateToolLockfileSentinel
-        and isinstance(r.union_member, GenerateToolLockfileSentinel)  # TypeGuard keeps mypy happy
+        and issubclass(r.union_member, GenerateToolLockfileSentinel)  # TypeGuard keeps mypy happy
         and r.union_member.resolve_name == subsystem.options_scope
     ).union_member
 
