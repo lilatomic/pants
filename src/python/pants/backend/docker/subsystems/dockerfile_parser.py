@@ -12,7 +12,7 @@ from pants.backend.docker.util_rules.docker_build_args import DockerBuildArgs
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
 from pants.backend.python.util_rules import pex
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.backend.python.util_rules.pex import PexRequest, VenvPex, VenvPexProcess
 from pants.engine.addresses import Address
 from pants.engine.fs import CreateDigest, Digest, FileContent
@@ -188,5 +188,5 @@ def rules():
     return (
         *collect_rules(),
         *pex.rules(),
-        *LockfileType.pex_simple(DockerfileParser),
+        *LockfileRules.from_tool(DockerfileParser),
     )

@@ -24,7 +24,7 @@ from pants.backend.python.target_types import (
     PythonTestsXdistConcurrencyField,
     SkipPythonTestsField,
 )
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
 from pants.core.goals.test import RuntimePackageDependenciesField, TestFieldSet
 from pants.core.util_rules.config_files import ConfigFilesRequest
@@ -224,6 +224,6 @@ async def pytest_export(
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.python_with_constraints(PyTest, PythonTestFieldSet),
+        *LockfileRules.from_tool_with_constraints(PyTest, PythonTestFieldSet),
         UnionRule(ExportPythonToolSentinel, PytestExportSentinel),
     )

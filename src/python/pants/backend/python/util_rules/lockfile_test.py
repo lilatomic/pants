@@ -9,7 +9,7 @@ from typing import Iterable, Type
 from pants.backend.python.dependency_inference.rules import import_rules
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.core.goals import generate_lockfiles
 from pants.core.goals.generate_lockfiles import GenerateLockfilesGoal, GenerateToolLockfileSentinel
 from pants.engine.target import Dependencies, SingleSourceField, Target
@@ -63,7 +63,7 @@ class MockTarget(Target):
 
 
 def mk_rule_runner() -> RuleRunner:
-    generated_rules = tuple(LockfileType.pex_simple(FakeTool))
+    generated_rules = tuple(LockfileRules.from_tool(FakeTool))
 
     rule_runner = RuleRunner(
         rules=[

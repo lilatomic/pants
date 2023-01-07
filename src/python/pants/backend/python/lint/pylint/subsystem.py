@@ -18,7 +18,7 @@ from pants.backend.python.target_types import (
     PythonResolveField,
     PythonSourceField,
 )
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
 from pants.backend.python.util_rules.pex_requirements import PexRequirements
 from pants.backend.python.util_rules.python_sources import (
@@ -296,6 +296,8 @@ async def pylint_export(
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.python_with_first_party(Pylint, PylintFieldSet, PylintFirstPartyPlugins),
+        *LockfileRules.from_tool_with_first_party_plugins(
+            Pylint, PylintFieldSet, PylintFirstPartyPlugins
+        ),
         UnionRule(ExportPythonToolSentinel, PylintExportSentinel),
     )

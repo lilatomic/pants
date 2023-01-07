@@ -6,7 +6,7 @@ from __future__ import annotations
 from pants.backend.python.goals.export import ExportPythonTool, ExportPythonToolSentinel
 from pants.backend.python.subsystems.python_tool_base import ExportToolOption, PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.engine.rules import collect_rules, rule
 from pants.engine.unions import UnionRule
 from pants.option.option_types import ArgsListOption, SkipOption
@@ -52,6 +52,6 @@ def pyupgrade_export(_: PyUpgradeExportSentinel, pyupgrade: PyUpgrade) -> Export
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.pex_simple(PyUpgrade),
+        *LockfileRules.from_tool(PyUpgrade),
         UnionRule(ExportPythonToolSentinel, PyUpgradeExportSentinel),
     )

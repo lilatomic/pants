@@ -3,7 +3,7 @@
 
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import ConsoleScript
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.engine.rules import collect_rules
 from pants.util.docutil import git_url
 
@@ -27,5 +27,5 @@ class Lambdex(PythonToolBase):
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.pex_simple(Lambdex),
+        *LockfileRules.from_tool(Lambdex),
     )

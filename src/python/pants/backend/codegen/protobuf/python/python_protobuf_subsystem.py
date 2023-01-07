@@ -12,7 +12,7 @@ from pants.backend.codegen.utils import find_python_runtime_library_or_raise_err
 from pants.backend.python.dependency_inference.module_mapper import ThirdPartyPythonModuleMapping
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.subsystems.setup import PythonSetup
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.engine.rules import collect_rules, rule
 from pants.engine.target import FieldSet, InferDependenciesRequest, InferredDependencies
 from pants.engine.unions import UnionRule
@@ -144,5 +144,5 @@ def rules():
     return [
         *collect_rules(),
         UnionRule(InferDependenciesRequest, InferPythonProtobufDependencies),
-        *LockfileType.pex_simple(PythonProtobufMypyPlugin),
+        *LockfileRules.from_tool(PythonProtobufMypyPlugin),
     ]

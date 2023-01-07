@@ -14,7 +14,7 @@ from pants.backend.python.target_types import (
     InterpreterConstraintsField,
     PythonSourceField,
 )
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.backend.python.util_rules.partition import _find_all_unique_interpreter_constraints
 from pants.core.util_rules.config_files import ConfigFilesRequest
 from pants.engine.rules import collect_rules, rule
@@ -106,6 +106,6 @@ async def bandit_export(
 def rules():
     return (
         *collect_rules(),
-        *LockfileType.python_with_constraints(Bandit, BanditFieldSet),
+        *LockfileRules.from_tool_with_constraints(Bandit, BanditFieldSet),
         UnionRule(ExportPythonToolSentinel, BanditExportSentinel),
     )

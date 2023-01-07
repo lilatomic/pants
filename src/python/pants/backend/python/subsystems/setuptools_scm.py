@@ -3,7 +3,7 @@
 
 from pants.backend.python.subsystems.python_tool_base import PythonToolBase
 from pants.backend.python.target_types import EntryPoint
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.util.docutil import git_url
 
 
@@ -28,5 +28,5 @@ class SetuptoolsSCM(PythonToolBase):
 def rules():
     return (
         *SetuptoolsSCM.rules(),
-        *LockfileType.pex_simple(SetuptoolsSCM),
+        *LockfileRules.from_tool(SetuptoolsSCM),
     )

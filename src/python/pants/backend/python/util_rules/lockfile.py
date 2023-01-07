@@ -29,16 +29,16 @@ from pants.util.ordered_set import FrozenOrderedSet
 from pants.util.strutil import softwrap
 
 
-class LockfileType:
+class LockfileRules:
     """The type of lockfile generation strategy to use for a tool."""
 
     @staticmethod
-    def custom(cls) -> Iterable:
+    def custom(cls: Type[PythonToolBase]) -> Iterable:
         """The plugin author defines its own export machinery."""
         yield from lockfile.rules()
 
     @staticmethod
-    def pex_simple(cls) -> Iterable:
+    def from_tool(cls: Type[PythonToolBase]) -> Iterable:
         """The tool can be just pip-installed."""
 
         rules_generator = _pex_simple_lockfile_rules(cls)
@@ -46,14 +46,18 @@ class LockfileType:
         yield from lockfile.rules()
 
     @staticmethod
-    def python_with_constraints(cls, field_set_type):
+    def from_tool_with_constraints(cls: Type[PythonToolBase], field_set_type: type[FieldSet]):
         """This tool needs to identify interpreter versions used in the project."""
         rules_generator = _pex_constraints_lockfile_rules(cls, field_set_type)
         yield from rules_generator
         yield from lockfile.rules()
 
     @staticmethod
-    def python_with_first_party(cls, field_set_type, first_part_plugins_type):
+    def from_tool_with_first_party_plugins(
+        cls: Type[PythonToolBase],
+        field_set_type: type[FieldSet],
+        first_part_plugins_type: type[HasFirstPartyPlugins],
+    ):
         rules_generator = _pex_with_first_party_lockfile_rules(
             cls, field_set_type, first_part_plugins_type
         )

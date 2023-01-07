@@ -7,7 +7,7 @@ from pathlib import PurePath
 
 from pants.backend.python.subsystems.python_tool_base import PythonToolRequirementsBase
 from pants.backend.python.target_types import EntryPoint
-from pants.backend.python.util_rules.lockfile import LockfileType
+from pants.backend.python.util_rules.lockfile import LockfileRules
 from pants.backend.python.util_rules.pex import PexRequest, VenvPex, VenvPexProcess
 from pants.backend.terraform.target_types import TerraformModuleSourcesField
 from pants.base.glob_match_error_behavior import GlobMatchErrorBehavior
@@ -148,5 +148,5 @@ def rules():
     return [
         *collect_rules(),
         UnionRule(InferDependenciesRequest, InferTerraformModuleDependenciesRequest),
-        *LockfileType.pex_simple(TerraformHcl2Parser),
+        *LockfileRules.from_tool(TerraformHcl2Parser),
     ]
