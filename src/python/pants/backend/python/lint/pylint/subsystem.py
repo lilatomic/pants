@@ -214,45 +214,6 @@ async def pylint_first_party_plugins(pylint: Pylint) -> PylintFirstPartyPlugins:
     )
 
 
-# # --------------------------------------------------------------------------------------
-# # Lockfile
-# # --------------------------------------------------------------------------------------
-#
-#
-# class PylintLockfileSentinel(GeneratePythonToolLockfileSentinel):
-#     resolve_name = Pylint.options_scope
-#
-#
-# @rule(
-#     desc=softwrap(
-#         """
-#         Determine all Python interpreter versions used by Pylint in your project
-#         (for lockfile generation)
-#         """
-#     ),
-#     level=LogLevel.DEBUG,
-# )
-# async def setup_pylint_lockfile(
-#     _: PylintLockfileSentinel,
-#     first_party_plugins: PylintFirstPartyPlugins,
-#     pylint: Pylint,
-#     python_setup: PythonSetup,
-# ) -> GeneratePythonLockfile:
-#     if not pylint.uses_custom_lockfile:
-#         return GeneratePythonLockfile.from_tool(pylint)
-#
-#     constraints = await _find_all_unique_interpreter_constraints(
-#         python_setup,
-#         PylintFieldSet,
-#         extra_constraints_per_tgt=first_party_plugins.interpreter_constraints_fields,
-#     )
-#     return GeneratePythonLockfile.from_tool(
-#         pylint,
-#         constraints,
-#         extra_requirements=first_party_plugins.requirement_strings,
-#     )
-
-
 # --------------------------------------------------------------------------------------
 # Export
 # --------------------------------------------------------------------------------------
