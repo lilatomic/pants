@@ -3,7 +3,9 @@
 
 from pants.backend.python.goals import lockfile as python_lockfile
 from pants.backend.terraform import dependency_inference, tool
-from pants.backend.terraform.goals import check, tailor
+from pants.backend.terraform.goals import check
+from pants.backend.terraform.goals import lockfile as terraform_lockfile
+from pants.backend.terraform.goals import tailor
 from pants.backend.terraform.lint.tffmt.tffmt import rules as tffmt_rules
 from pants.backend.terraform.target_types import TerraformModuleTarget
 from pants.backend.terraform.target_types import rules as target_types_rules
@@ -24,4 +26,5 @@ def rules():
         *tool.rules(),
         *tffmt_rules(),
         *python_lockfile.rules(),
+        *terraform_lockfile.rules(),
     ]

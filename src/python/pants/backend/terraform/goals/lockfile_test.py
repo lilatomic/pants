@@ -12,7 +12,6 @@ from pants.core.util_rules.source_files import SourceFiles, SourceFilesRequest
 from pants.engine.fs import DigestContents
 from pants.engine.internals.native_engine import Address
 from pants.engine.rules import QueryRule
-from pants.engine.target import Target
 from pants.testutil.rule_runner import RuleRunner
 
 
@@ -39,12 +38,15 @@ def rule_runner() -> RuleRunner:
     return rule_runner
 
 
-def run_lockfiles(rule_runner: RuleRunner, target: Target) -> DigestContents:
+def run_lockfiles(rule_runner: RuleRunner, target: TerraformModuleTarget) -> DigestContents:
     lockfile = rule_runner.request(
         GenerateLockfileResult,
         [
             GenerateTerraformLockfile(
-                resolve_name="tf", lockfile_dest="src/tf/.terraform.lock.hcl", diff=False
+                target=target,
+                resolve_name="tf",
+                lockfile_dest="src/tf/.terraform.lock.hcl",
+                diff=False,
             ),
             target,
         ],
@@ -63,6 +65,7 @@ def test_lock_single_provider(rule_runner: RuleRunner):
         }
     )
     tgt = rule_runner.get_target(Address("src/tf", target_name=target_name))
+    assert isinstance(tgt, TerraformModuleTarget)
 
     v = run_lockfiles(rule_runner, tgt)
     assert v
