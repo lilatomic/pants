@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable
 
+from pants.backend.terraform.partition import partition_files_by_directory
 from pants.backend.terraform.target_types import TerraformModuleSourcesField, TerraformModuleTarget
 from pants.backend.terraform.tool import TerraformProcess
 from pants.core.goals.generate_lockfiles import (
@@ -44,6 +45,10 @@ async def generate_lockfile_from_sources(
     source_files = await Get(
         SourceFiles, SourceFilesRequest([target.get(TerraformModuleSourcesField)])
     )
+    files_by_directory = partition_files_by_directory(source_files.files)
+    assert (
+        len(files_by_directory) == 1
+    ), "Asked to generate a lockfile for Terraform files in multiple directories, we can't determine where the root is"
 
     result = await Get(
         ProcessResult,
@@ -55,7 +60,7 @@ async def generate_lockfile_from_sources(
             input_digest=source_files.snapshot.digest,
             output_files=(".terraform.lock.hcl",),
             description=f"Update terraform lockfile for {request.resolve_name}",
-            chdir="src/tf",
+            chdir=next(iter(files_by_directory.keys())),
         ),
     )
 
