@@ -157,3 +157,57 @@ def test_dependency_inference(rule_runner: RuleRunner, caplog) -> None:
     assert "The target ambiguous/main.sh:main sources `ambiguous/dep.sh`" in caplog.text
     assert "['ambiguous/dep.sh:dep1', 'ambiguous/dep.sh:dep2']" in caplog.text
     assert "disambiguated.sh" not in caplog.text
+
+
+# @pytest.mark.xfail
+def test_issue_18375(rule_runner: RuleRunner, caplog) -> None:
+    rule_runner.write_files(
+        {
+            "BUILD": "shell_sources()",
+            "t.sh": dedent(
+                """\
+            #!/bin/bash
+            set -euxf pipefail
+            if [ ! -f pants ]; then
+                echo "Run this from the repo root: ./build/scripts/dev_container.sh"
+                exit 1
+            fi
+            : ${IMG_NAME:=ghcr.io/x-deploy-image}
+            : ${IMG_TAG:=@sha256:...}
+            : ${IMG:=$IMG_NAME$IMG_TAG}
+            : ${DEV_HOME:=${HOME}/.cache/x}
+            mkdir -p ${DEV_HOME}
+            cat << EOF > ${DEV_HOME}/.gitconfig
+            [safe]
+                    directory = /src
+            EOF
+            docker run \
+                --platform linux/amd64 \
+                -it \
+                --rm \
+                --network=host \
+                -w /src \
+                -v $(pwd):/src \
+                -u $(id -u):$(id -g) \
+                -v ${DEV_HOME}:/home/${USER} \
+                -e HOME=/home/${USER} \
+                -e USER \
+                -e PANTS_WATCH_FILESYSTEM=false \
+                -e PANTS_LOCAL_CACHE=false \
+                -e PANTS_PANTSD=false \
+                -e PANTS_LOCAL_STORE_PROCESSES_MAX_SIZE_BYTES=1600000000 \
+                -e PANTS_LOCAL_STORE_FILES_MAX_SIZE_BYTES=2560000000 \
+                -e PANTS_LOCAL_STORE_DIRECTORIES_MAX_SIZE_BYTES=1600000000 \
+                ${IMG}
+        """
+            ),
+        }
+    )
+
+    address = Address("", relative_file_path="t.sh")
+    tgt = rule_runner.get_target(address)
+    result = rule_runner.request(
+        InferredDependencies,
+        [InferShellDependencies(ShellDependenciesInferenceFieldSet.create(tgt))],
+    )
+    assert result == InferredDependencies(tuple())
