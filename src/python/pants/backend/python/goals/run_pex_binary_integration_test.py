@@ -235,3 +235,75 @@ def test_run_script_from_3rdparty_dist_issue_13747() -> None:
         result = run_pants(args)
         result.assert_success()
         assert SAY in result.stdout.strip()
+
+
+@pytest.mark.parametrize("enable_resolves", [True, False])
+@pytest.mark.parametrize("venv_mode", [True, False])
+def test_issue_17170(enable_resolves, venv_mode) -> None:
+    if venv_mode:
+        pex_target = dedent(
+            """\
+            pex_binary(
+                name="sample0",
+                entry_point="sample.py",
+                execution_mode="venv",
+                venv_site_packages_copies=True,
+            )"""
+        )
+    else:
+        pex_target = dedent(
+            """\
+            pex_binary(
+                name="sample0",
+                entry_point="sample.py",
+            )"""
+        )
+    sources = {
+        "src/requirements.txt": dedent(
+            """\
+            azure-nspkg==2.0.0
+            azure-identity==1.10.0
+            azure-common==1.1.11
+        """
+        ),
+        "src/sample.py": dedent(
+            """\
+            import azure.common
+            from azure.identity import DefaultAzureCredential
+
+            if __name__ == "__main__":
+                print(DefaultAzureCredential)
+        """
+        ),
+        "src/BUILD": dedent(
+            """\
+            python_requirements(
+                name="reqs0",
+            )
+
+            python_sources(
+                name="root",
+            )
+        """
+        )
+        + pex_target,
+        "default.lock": "",
+    }
+    with setup_tmpdir(sources) as tmpdir:
+        args = [
+            "--backend-packages=pants.backend.python",
+            f"--source-root-patterns=['/{tmpdir}/src']",
+            f"--python-enable-resolves={enable_resolves}",
+            "--python-default-resolve=python-default",
+            "--python-resolves={'python-default':'default.lock'}",
+        ]
+        generate_lockfiles_args = ["generate-lockfiles", "--resolve=python-default"]
+        run_args = [
+            "run",
+            f"{tmpdir}/src:sample0",
+        ]
+
+        if enable_resolves:
+            run_pants(args + generate_lockfiles_args)
+        result = run_pants(args + run_args)
+        assert result.exit_code == 0, result.stderr
