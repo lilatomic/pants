@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "value_b": {
+      "type": "string"
+    },
+    "value_c": {
+      "type": "string"
+    },
+    "value_a": {
+      "type": "string"
+    }
+  },
+  "required": ["value_a", "value_b", "value_c"]
+}
