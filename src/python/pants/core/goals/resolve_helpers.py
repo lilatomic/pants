@@ -100,6 +100,12 @@ class KnownUserResolveNames:
     requested_resolve_names_cls: type[RequestedUserResolveNames]
 
 
+@union
+@dataclass(frozen=True)
+class ExportableTool:
+    ...
+
+
 @union(in_scope_types=[EnvironmentName])
 class RequestedUserResolveNames(Collection[str]):
     """The user resolves requested for a particular language ecosystem.
