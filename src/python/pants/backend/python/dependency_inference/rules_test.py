@@ -224,12 +224,16 @@ def test_infer_python_assets(caplog) -> None:
             "src/python/data/BUILD": "resources(name='jsonfiles', sources=['*.json'])",
             "src/python/data/db.json": "",
             "src/python/data/db2.json": "",
+            "src/python/data/db3.json": "This is for `importlib.resources.files(__package__).joinpath('data/db3.json')`",
             "src/python/data/flavors.txt": "",
             "configs/prod.txt": "",
             "src/python/app.py": dedent(
                 """\
                 pkgutil.get_data(__name__, "data/db.json")
                 pkgutil.get_data(__name__, "data/db2.json")
+                
+                importlib.resources.files(__package__).joinpath('data/db3.json')`
+                
                 open("configs/prod.txt")
                 """
             ),
@@ -282,6 +286,7 @@ def test_infer_python_assets(caplog) -> None:
         [
             Address("src/python/data", target_name="jsonfiles", relative_file_path="db.json"),
             Address("src/python/data", target_name="jsonfiles", relative_file_path="db2.json"),
+            Address("src/python/data", target_name="jsonfiles", relative_file_path="db3.json"),
             Address("configs", target_name="configs", relative_file_path="prod.txt"),
         ],
     )
